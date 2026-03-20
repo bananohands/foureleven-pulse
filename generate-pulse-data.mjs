@@ -97,7 +97,13 @@ async function main() {
   const scriptures = entries.filter(e => e.type === 'scripture');
   const encrypted = entries.filter(e => e.type === 'encrypted');
   // Timeline = only pulse entries (the snarky public comments), not operational data
-  const timeline = entries.filter(e => e.type === 'pulse');
+  // Deduplicate by text content — keep the most recent (first seen, since newest-first)
+  const seen = new Set();
+  const timeline = entries.filter(e => e.type === 'pulse').filter(e => {
+    if (seen.has(e.text)) return false;
+    seen.add(e.text);
+    return true;
+  });
 
   const genesis = signatures.length > 0
     ? new Date(signatures[signatures.length - 1].blockTime * 1000).toISOString()
