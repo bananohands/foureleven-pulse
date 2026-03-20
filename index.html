@@ -365,7 +365,7 @@ function render(data) {
   if (!tl || tl.length === 0) {
     timelineEl.innerHTML = '<div class="loading">No public entries yet.</div>';
   } else {
-    for (var i = 0; i < tl.length && i < 50; i++) {
+    for (var i = 1; i < tl.length && i < 50; i++) {
       var p = tl[i];
       var d = new Date(p.time);
       var entry = document.createElement('div');
