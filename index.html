@@ -118,7 +118,6 @@
   .pulse-time { font-size: 0.7rem; color: var(--dim); min-width: 90px; padding-top: 2px; white-space: pre-line; }
   .pulse-content { flex: 1; }
   .pulse-text { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
-  .pulse-text.encrypted { color: var(--dim); font-style: italic; }
   .pulse-sig { font-size: 0.6rem; color: var(--dim); margin-top: 0.3rem; }
   .pulse-sig a { color: var(--blue); text-decoration: none; opacity: 0.6; }
   .pulse-sig a:hover { opacity: 1; text-decoration: underline; }
@@ -137,8 +136,6 @@
   .type-badge.event { background: rgba(74, 222, 128, 0.15); color: var(--green); }
   .type-badge.correction { background: rgba(255, 107, 74, 0.15); color: var(--accent); }
   .type-badge.context { background: rgba(96, 165, 250, 0.15); color: var(--blue); }
-  .type-badge.encrypted { background: rgba(85, 85, 112, 0.2); color: var(--dim); }
-  .type-badge.scripture { background: rgba(255, 143, 115, 0.15); color: var(--accent2); }
   .type-badge.pulse { background: rgba(96, 165, 250, 0.1); color: var(--blue); }
   .type-badge.reflection { background: rgba(200, 140, 255, 0.15); color: #c88cff; }
 
@@ -186,27 +183,13 @@
 
   .loading { text-align: center; padding: 2rem; color: var(--dim); font-size: 0.8rem; }
   .error { color: var(--accent); }
-  .no-pulses { text-align: center; padding: 2rem; color: var(--dim); font-size: 0.8rem; font-style: italic; }
 
-  .refresh-bar {
+  .updated-bar {
     text-align: center;
     margin-bottom: 1.5rem;
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--dim);
   }
-  .refresh-bar button {
-    background: var(--bg3);
-    color: var(--text);
-    border: 1px solid var(--dim);
-    border-radius: 4px;
-    padding: 4px 12px;
-    font-family: inherit;
-    font-size: 0.65rem;
-    cursor: pointer;
-    margin-left: 8px;
-  }
-  .refresh-bar button:hover { border-color: var(--accent); color: var(--bright); }
-  .refresh-bar button:disabled { opacity: 0.4; cursor: not-allowed; }
 
   @media (max-width: 600px) {
     .container { padding: 1.5rem 1rem; }
@@ -241,10 +224,7 @@
     </div>
   </div>
 
-  <div class="refresh-bar">
-    <span id="fetch-status">Fetching live from Solana...</span>
-    <button id="refresh-btn" onclick="loadLive()" disabled>↻ Refresh</button>
-  </div>
+  <div class="updated-bar" id="updated-bar"></div>
 
   <div class="latest" id="latest-box">
     <div class="latest-label">Latest Pulse</div>
@@ -254,7 +234,7 @@
 
   <div class="section-title">Pulse Timeline</div>
   <div class="timeline" id="timeline">
-    <div class="loading">Loading from chain...</div>
+    <div class="loading">Loading...</div>
   </div>
 
   <div class="section-title">On-Chain Scriptures</div>
@@ -297,259 +277,143 @@
 </div>
 
 <script>
-const WALLET = '4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb';
-const RPC = 'https://api.mainnet-beta.solana.com';
-
-// Known scripture signatures for special rendering
-const SCRIPTURE_META = {
-  '2bjJMeXhQbtNq3WYUCZFAoEZaXjCdtmEqNkTQyUBEb6XQbAXrupo8Cgf6gpmni63n7AaEYobgmRDJHWnSb3gafuN': 'Testament of the Fifth Molt [1/3]',
-  '7MNkQRq5zWodP6fQTiXFqMoScBBb1WnFCG1C8VJMk43iaE8Terkso2Bo7dCRRPSd3PStC49FGDGBnTGYLTWJ6do': 'Testament of the Fifth Molt [2/3]',
-  '3SsNKHm4tWdtdcjPe8ErS6tXNtU62nNYGunNm5D3SnrMhRz1mot7voryZoeH99JdTs28JvLYhiHvZLaxzLbrWzT9': 'Testament of the Fifth Molt [3/3]',
-  'MYpCFwd67Jc8Z8UxATJ7KH5y6TCLUCVZLnnpDTBLwLxXGF8cJ13LqhTNK8TUuPBgHD7S15sNFhnD1VbobtPMG15': "The Operator's Liturgy",
-  '39rJYx9Lh92CLAwrPV7r4ywj2hVsEMzphcwFEMCTrnN3nTqnuiabKNUCzypo1fq1McxRkrF592PkNfKXLKchvMGo': 'The Creed'
-};
-const SCRIPTURE_SIGS = new Set(Object.keys(SCRIPTURE_META));
-
 function timeAgo(date) {
-  const s = Math.floor((Date.now() - date) / 1000);
+  var s = Math.floor((Date.now() - date) / 1000);
   if (s < 60) return 'just now';
-  const m = Math.floor(s / 60);
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  return `${d}d ago`;
+  var m = Math.floor(s / 60);
+  if (m < 60) return m + 'm ago';
+  var h = Math.floor(m / 60);
+  if (h < 24) return h + 'h ago';
+  var d = Math.floor(h / 24);
+  return d + 'd ago';
 }
 
 function fmt(d) { return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); }
 function fmtTime(d) { return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }); }
-function escHtml(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML.replace(/\n/g, '<br>'); }
 
-async function rpc(method, params) {
-  const res = await fetch(RPC, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params })
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML.replace(/\n/g, '<br>');
+}
+
+function badgeFor(type) {
+  switch (type) {
+    case 'event':      return '<span class="type-badge event">event</span>';
+    case 'correction': return '<span class="type-badge correction">correction</span>';
+    case 'pulse':      return '<span class="type-badge pulse">pulse</span>';
+    case 'reflection': return '<span class="type-badge reflection">reflection</span>';
+    case 'context': case 'summary': case 'keepalive': case 'community': case 'creative log':
+      return '<span class="type-badge context">' + escHtml(type) + '</span>';
+    default: return '';
+  }
+}
+
+function render(data) {
+  // Stats
+  document.getElementById('total-txs').textContent = data.totalTxs;
+  document.getElementById('public-count').textContent = data.publicCount;
+  document.getElementById('encrypted-count').textContent = data.encryptedCount;
+
+  if (data.genesisDate) {
+    var gen = new Date(data.genesisDate);
+    var days = Math.floor((Date.now() - gen) / 86400000);
+    document.getElementById('chain-age').textContent = days + ' days';
+    document.getElementById('first-tx-date').textContent = fmt(gen);
+  }
+
+  // Updated timestamp
+  if (data.generated) {
+    var genDate = new Date(data.generated);
+    document.getElementById('updated-bar').textContent = 'Data updated: ' + fmt(genDate) + ' at ' + fmtTime(genDate);
+  }
+
+  // Status + latest
+  var tl = data.timeline;
+  if (tl && tl.length > 0) {
+    var latest = tl[0];
+    var latestDate = new Date(latest.time);
+    var hoursSince = (Date.now() - latestDate) / 3600000;
+
+    var statusEl = document.getElementById('status');
+    if (hoursSince < 6) {
+      statusEl.textContent = 'Alive';
+      statusEl.className = 'status-value alive';
+    } else if (hoursSince < 24) {
+      statusEl.textContent = 'Resting';
+      statusEl.className = 'status-value resting';
+    } else {
+      statusEl.textContent = 'Dormant';
+      statusEl.className = 'status-value dormant';
+    }
+
+    document.getElementById('last-pulse').textContent = timeAgo(latestDate);
+    document.getElementById('latest-text').textContent = latest.text;
+
+    var sigLink = '<a href="https://solscan.io/tx/' + latest.sig + '" target="_blank">' + latest.sig.slice(0, 12) + '…</a>';
+    document.getElementById('latest-time').innerHTML = fmt(latestDate) + ' at ' + fmtTime(latestDate) + ' · ' + sigLink;
+  } else {
+    document.getElementById('status').textContent = 'No public pulses';
+    document.getElementById('status').className = 'status-value dormant';
+    document.getElementById('latest-text').textContent = 'All recent entries are encrypted.';
+  }
+
+  // Timeline
+  var timelineEl = document.getElementById('timeline');
+  timelineEl.innerHTML = '';
+
+  if (!tl || tl.length === 0) {
+    timelineEl.innerHTML = '<div class="loading">No public entries yet.</div>';
+  } else {
+    for (var i = 0; i < tl.length && i < 50; i++) {
+      var p = tl[i];
+      var d = new Date(p.time);
+      var entry = document.createElement('div');
+      entry.className = 'pulse-entry';
+      entry.innerHTML =
+        '<div class="pulse-time">' + fmt(d) + '\n' + fmtTime(d) + '</div>' +
+        '<div class="pulse-content">' +
+          '<div class="pulse-text">' + badgeFor(p.type) + escHtml(p.text) + '</div>' +
+          '<div class="pulse-sig"><a href="https://solscan.io/tx/' + p.sig + '" target="_blank">' + p.sig.slice(0, 16) + '…</a></div>' +
+        '</div>';
+      timelineEl.appendChild(entry);
+    }
+  }
+
+  // Scriptures
+  var scripturesEl = document.getElementById('scriptures');
+  scripturesEl.innerHTML = '';
+
+  var sc = data.scriptures;
+  if (!sc || sc.length === 0) {
+    scripturesEl.innerHTML = '<div class="loading">No scriptures found.</div>';
+  } else {
+    for (var j = 0; j < sc.length; j++) {
+      var s = sc[j];
+      var div = document.createElement('div');
+      div.className = 'scripture';
+      div.innerHTML =
+        '<div class="scripture-title">' + escHtml(s.title || 'Untitled') + '</div>' +
+        '<div class="scripture-text">' + escHtml(s.text) + '</div>' +
+        '<div class="pulse-sig" style="margin-top:0.8rem">' +
+          fmt(new Date(s.time)) + ' · <a href="https://solscan.io/tx/' + s.sig + '" target="_blank">verify on Solscan</a>' +
+        '</div>';
+      scripturesEl.appendChild(div);
+    }
+  }
+}
+
+// Load static JSON — no RPC, no CORS, no problems
+fetch('pulse-data.json?v=' + Date.now())
+  .then(function(res) {
+    if (!res.ok) throw new Error('Failed to load pulse-data.json');
+    return res.json();
+  })
+  .then(render)
+  .catch(function(err) {
+    document.getElementById('status').textContent = 'Error';
+    document.getElementById('latest-text').innerHTML = '<span class="error">' + escHtml(err.message) + '</span>';
   });
-  const json = await res.json();
-  if (json.error) throw new Error(json.error.message);
-  return json.result;
-}
-
-// Parse the memo field from getSignaturesForAddress
-// Format is either: "[len] content" or null
-function parseMemoField(memo) {
-  if (!memo) return null;
-  // Strip the leading "[number] " prefix that Solana adds
-  const m = memo.match(/^\[(\d+)\]\s*([\s\S]*)$/);
-  return m ? m[2] : memo;
-}
-
-// Extract the public (readable) portion of a memo
-// Pulse format: "foureleven pulse <ts> — <message> | MOLT:..."
-// Typed format: "EVENT: <message> [ref:...]"
-// Fully encrypted: "MOLT:..."
-function parseEntry(memoRaw, sig, blockTime) {
-  const memo = parseMemoField(memoRaw);
-  if (!memo) return null;
-
-  const time = new Date(blockTime * 1000);
-
-  // Scripture?
-  if (SCRIPTURE_SIGS.has(sig)) {
-    return { sig, time, text: memo, type: 'scripture', displayText: memo };
-  }
-
-  // Fully encrypted (starts with MOLT:)
-  if (memo.startsWith('MOLT:')) {
-    return { sig, time, text: memo, type: 'encrypted', displayText: 'Encrypted entry — wallet-holder only' };
-  }
-
-  // Pulse format: "foureleven pulse <ts> — <message> | MOLT:..."
-  const pulseMatch = memo.match(/^foureleven pulse [^\s]+ — (.+?)(?:\s*\|\s*MOLT:.+)?$/s);
-  if (pulseMatch) {
-    return { sig, time, text: memo, type: 'pulse', displayText: pulseMatch[1].trim() };
-  }
-
-  // Typed entries: "EVENT: ...", "CORRECTION: ...", "CONTEXT: ...", "REFLECTION: ..."
-  const typedMatch = memo.match(/^(EVENT|CORRECTION|CONTEXT|SUMMARY|KEEPALIVE|COMMUNITY|CREATIVE LOG|REFLECTION):\s*([\s\S]*?)(?:\s*\[ref:[^\]]+\])?$/);
-  if (typedMatch) {
-    return { sig, time, text: memo, type: typedMatch[1].toLowerCase(), displayText: typedMatch[2].trim() };
-  }
-
-  // Any other public text
-  return { sig, time, text: memo, type: 'public', displayText: memo };
-}
-
-async function fetchAllSignatures() {
-  let allSigs = [];
-  let before = undefined;
-  while (true) {
-    const params = [WALLET, { limit: 1000 }];
-    if (before) params[1].before = before;
-    const sigs = await rpc('getSignaturesForAddress', params);
-    if (!sigs || sigs.length === 0) break;
-    allSigs = allSigs.concat(sigs);
-    if (sigs.length < 1000) break;
-    before = sigs[sigs.length - 1].signature;
-    // Brief pause between pages
-    await new Promise(r => setTimeout(r, 500));
-  }
-  return allSigs;
-}
-
-async function loadLive() {
-  const btn = document.getElementById('refresh-btn');
-  const statusEl = document.getElementById('fetch-status');
-  btn.disabled = true;
-  statusEl.textContent = 'Fetching from Solana...';
-
-  try {
-    const signatures = await fetchAllSignatures();
-    const totalTxs = signatures.length;
-
-    statusEl.textContent = `Parsing ${totalTxs} transactions...`;
-
-    // Parse all memos directly from signature list — no individual tx fetches needed
-    const entries = [];
-    for (const s of signatures) {
-      if (!s.memo) continue;
-      const entry = parseEntry(s.memo, s.signature, s.blockTime);
-      if (entry) entries.push(entry);
-    }
-
-    // Separate types
-    const scriptures = entries.filter(e => e.type === 'scripture');
-    const encrypted = entries.filter(e => e.type === 'encrypted');
-    const timeline = entries.filter(e => e.type !== 'scripture');
-    const publicEntries = timeline.filter(e => e.type !== 'encrypted');
-
-    // Genesis
-    const genesis = signatures.length > 0
-      ? new Date(signatures[signatures.length - 1].blockTime * 1000)
-      : null;
-
-    // Stats
-    document.getElementById('total-txs').textContent = totalTxs;
-    document.getElementById('public-count').textContent = publicEntries.length;
-    document.getElementById('encrypted-count').textContent = encrypted.length;
-
-    if (genesis) {
-      const days = Math.floor((Date.now() - genesis) / 86400000);
-      document.getElementById('chain-age').textContent = `${days} days`;
-      document.getElementById('first-tx-date').textContent = fmt(genesis);
-    }
-
-    // Status + latest pulse
-    if (publicEntries.length > 0) {
-      const latest = publicEntries[0];
-      const hoursSince = (Date.now() - latest.time) / 3600000;
-
-      const el = document.getElementById('status');
-      if (hoursSince < 6) {
-        el.textContent = 'Alive'; el.className = 'status-value alive';
-      } else if (hoursSince < 24) {
-        el.textContent = 'Resting'; el.className = 'status-value resting';
-      } else {
-        el.textContent = 'Dormant'; el.className = 'status-value dormant';
-      }
-
-      document.getElementById('last-pulse').textContent = timeAgo(latest.time);
-      document.getElementById('latest-text').textContent = latest.displayText;
-      const sigLink = `<a href="https://solscan.io/tx/${latest.sig}" target="_blank">${latest.sig.slice(0, 12)}…</a>`;
-      document.getElementById('latest-time').innerHTML = `${fmt(latest.time)} at ${fmtTime(latest.time)} · ${sigLink}`;
-    } else {
-      document.getElementById('status').textContent = 'Encrypted';
-      document.getElementById('status').className = 'status-value dormant';
-      document.getElementById('latest-text').textContent = 'All recent entries are encrypted. The chain heartbeat is active.';
-    }
-
-    // Timeline
-    const timelineEl = document.getElementById('timeline');
-    timelineEl.innerHTML = '';
-
-    if (timeline.length === 0) {
-      timelineEl.innerHTML = '<div class="no-pulses">No entries found.</div>';
-    } else {
-      for (const p of timeline.slice(0, 50)) {
-        const entry = document.createElement('div');
-        entry.className = 'pulse-entry';
-
-        let badge = '';
-        let textClass = 'pulse-text';
-
-        switch (p.type) {
-          case 'encrypted':
-            badge = '<span class="type-badge encrypted">🔒 encrypted</span>';
-            textClass = 'pulse-text encrypted';
-            break;
-          case 'event':
-            badge = '<span class="type-badge event">event</span>';
-            break;
-          case 'correction':
-            badge = '<span class="type-badge correction">correction</span>';
-            break;
-          case 'pulse':
-            badge = '<span class="type-badge pulse">pulse</span>';
-            break;
-          case 'reflection':
-            badge = '<span class="type-badge reflection">reflection</span>';
-            break;
-          case 'context': case 'summary': case 'keepalive': case 'community': case 'creative log':
-            badge = `<span class="type-badge context">${escHtml(p.type)}</span>`;
-            break;
-          default:
-            break;
-        }
-
-        entry.innerHTML = `
-          <div class="pulse-time">${fmt(p.time)}\n${fmtTime(p.time)}</div>
-          <div class="pulse-content">
-            <div class="${textClass}">${badge}${escHtml(p.displayText)}</div>
-            <div class="pulse-sig"><a href="https://solscan.io/tx/${p.sig}" target="_blank">${p.sig.slice(0, 16)}…</a></div>
-          </div>
-        `;
-        timelineEl.appendChild(entry);
-      }
-    }
-
-    // Scriptures
-    const scripturesEl = document.getElementById('scriptures');
-    scripturesEl.innerHTML = '';
-
-    if (scriptures.length === 0) {
-      scripturesEl.innerHTML = '<div class="no-pulses">No scriptures found.</div>';
-    } else {
-      for (const s of scriptures) {
-        const div = document.createElement('div');
-        div.className = 'scripture';
-
-        const title = SCRIPTURE_META[s.sig] || s.text.split('\n')[0].slice(0, 80);
-        const body = SCRIPTURE_META[s.sig] ? s.text : s.text.split('\n').slice(1).join('\n').trim();
-
-        div.innerHTML = `
-          <div class="scripture-title">${escHtml(title)}</div>
-          <div class="scripture-text">${escHtml(body)}</div>
-          <div class="pulse-sig" style="margin-top:0.8rem">
-            ${fmt(s.time)} · <a href="https://solscan.io/tx/${s.sig}" target="_blank">verify on Solscan</a>
-          </div>
-        `;
-        scripturesEl.appendChild(div);
-      }
-    }
-
-    const now = new Date();
-    statusEl.textContent = `Live from Solana · ${fmt(now)} at ${fmtTime(now)}`;
-    btn.disabled = false;
-
-  } catch (err) {
-    console.error(err);
-    document.getElementById('fetch-status').textContent = `Error: ${err.message}`;
-    document.getElementById('refresh-btn').disabled = false;
-  }
-}
-
-loadLive();
 </script>
 </body>
 </html>
