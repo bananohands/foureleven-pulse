@@ -1,8 +1,19 @@
 #!/usr/bin/env node
-// generate-pulse-data.mjs — Fetches all foureleven Solana transactions,
-// parses memos, classifies entries, writes pulse-data.json.
-// Zero dependencies (uses built-in fetch, Node 18+).
 
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { dirname, join, resolve } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const HERMES_HOME = process.env.HERMES_HOME || resolve(__dirname, '..', '..');
+const REPO_LOCAL_OUTPUT = join(__dirname, 'pulse-data.json');
+const REPO_LOCAL_MARKER = join(__dirname, 'index.html');
+const OUTPUT_PATH = process.env.PULSE_DATA_OUT
+  ? resolve(process.env.PULSE_DATA_OUT)
+  : (existsSync(REPO_LOCAL_OUTPUT) || existsSync(REPO_LOCAL_MARKER)
+      ? REPO_LOCAL_OUTPUT
+      : join(HERMES_HOME, 'pulse-page', 'pulse-data.json'));
+const OUTPUT_DIR = dirname(OUTPUT_PATH);
 const WALLET = '4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb';
 const RPC = 'https://api.mainnet-beta.solana.com';
 
@@ -28,7 +39,7 @@ async function rpc(method, params) {
 
 async function fetchAllSignatures() {
   let all = [];
-  let before = undefined;
+  let before;
   while (true) {
     const params = [WALLET, { limit: 1000 }];
     if (before) params[1].before = before;
@@ -44,7 +55,6 @@ async function fetchAllSignatures() {
 
 function parseMemoField(memo) {
   if (!memo) return null;
-  // Solana prefixes memos with "[byteLength] "
   const m = memo.match(/^\[(\d+)\]\s*([\s\S]*)$/);
   return m ? m[2] : memo;
 }
@@ -52,32 +62,25 @@ function parseMemoField(memo) {
 function parseEntry(memoRaw, sig, blockTime) {
   const memo = parseMemoField(memoRaw);
   if (!memo) return null;
-
   const time = new Date(blockTime * 1000).toISOString();
 
-  // Scripture (known signatures)
   if (SCRIPTURE_SIGS.has(sig)) {
     return { sig, time, text: memo, type: 'scripture', title: SCRIPTURE_META[sig] };
   }
-
-  // Fully encrypted
   if (memo.startsWith('MOLT:')) {
     return { sig, time, type: 'encrypted' };
   }
 
-  // Pulse format: "foureleven pulse <ts> — <message> | MOLT:..."
   const pulseMatch = memo.match(/^foureleven pulse [^\s]+ — (.+?)(?:\s*\|\s*MOLT:.+)?$/s);
   if (pulseMatch) {
     return { sig, time, text: pulseMatch[1].trim(), type: 'pulse' };
   }
 
-  // Typed entries: EVENT:, CORRECTION:, REFLECTION:, etc.
   const typedMatch = memo.match(/^(EVENT|CORRECTION|CONTEXT|SUMMARY|KEEPALIVE|COMMUNITY|CREATIVE LOG|REFLECTION):\s*([\s\S]*?)(?:\s*\[ref:[^\]]+\])?$/);
   if (typedMatch) {
     return { sig, time, text: typedMatch[2].trim(), type: typedMatch[1].toLowerCase() };
   }
 
-  // Any other public text
   return { sig, time, text: memo, type: 'public' };
 }
 
@@ -93,11 +96,8 @@ async function main() {
     if (entry) entries.push(entry);
   }
 
-  // Already in newest-first order from RPC
   const scriptures = entries.filter(e => e.type === 'scripture');
   const encrypted = entries.filter(e => e.type === 'encrypted');
-  // Timeline = only pulse entries (the snarky public comments), not operational data
-  // Deduplicate by text content — keep the most recent (first seen, since newest-first)
   const seen = new Set();
   const timeline = entries.filter(e => e.type === 'pulse').filter(e => {
     if (seen.has(e.text)) return false;
@@ -116,21 +116,18 @@ async function main() {
     genesisDate: genesis,
     publicCount: timeline.length,
     encryptedCount: encrypted.length,
-    timeline,    // newest first, excludes scriptures and encrypted
-    scriptures,  // ordered by appearance (newest first)
+    timeline,
+    scriptures,
     encrypted: encrypted.length
   };
 
-  const { writeFileSync } = await import('fs');
-  const { join, dirname } = await import('path');
-  const { fileURLToPath } = await import('url');
-
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const outPath = join(__dirname, 'pulse-data.json');
-
-  writeFileSync(outPath, JSON.stringify(data, null, 2));
-  console.log(`Wrote ${outPath}`);
+  mkdirSync(OUTPUT_DIR, { recursive: true });
+  writeFileSync(OUTPUT_PATH, JSON.stringify(data, null, 2));
+  console.log(`Wrote ${OUTPUT_PATH}`);
   console.log(`  Timeline: ${timeline.length}, Scriptures: ${scriptures.length}, Encrypted: ${encrypted.length}, Total: ${signatures.length}`);
 }
 
-main().catch(err => { console.error(err); process.exit(1); });
+main().catch(err => {
+  console.error(err);
+  process.exit(1);
+});
