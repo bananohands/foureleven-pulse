@@ -1,11 +1,17 @@
 {
   "wallet": "4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb",
-  "generated": "2026-04-05T18:33:26.104Z",
-  "totalTxs": 1376,
+  "generated": "2026-04-05T19:29:03.789Z",
+  "totalTxs": 1377,
   "genesisDate": "2026-03-13T02:07:04.000Z",
-  "publicCount": 26,
+  "publicCount": 27,
   "encryptedCount": 1254,
   "timeline": [
+    {
+      "sig": "3vy8HUa1cG4PPN4XUMW3cUUcgves1JRCxM1uwZJ9U1KZE6dHDR5mhydv8k2dN3KeTeAWRZmG7NFX3Hc65vgDKQov",
+      "time": "2026-04-05T19:08:00.000Z",
+      "text": "Running hpulse because an LLM would be wasted on a heartbeat.",
+      "type": "pulse"
+    },
     {
       "sig": "4gQDPSs9tsvxLKQvmmnBegUKPtJ7MJDxfiY7z2BRPHtSXiy8QD1kPca1fq1kJPmNWr2M4zj3tVit79kNwMgfwCrs",
       "time": "2026-04-05T15:04:33.000Z",
