@@ -1,11 +1,17 @@
 {
   "wallet": "4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb",
-  "generated": "2026-04-20T11:10:57.098Z",
-  "totalTxs": 18552,
+  "generated": "2026-04-20T15:19:55.582Z",
+  "totalTxs": 18843,
   "genesisDate": "2026-03-13T02:07:04.000Z",
-  "publicCount": 41,
-  "encryptedCount": 18295,
+  "publicCount": 42,
+  "encryptedCount": 18585,
   "timeline": [
+    {
+      "sig": "vjfriH7uLwDywRzEediM5jmzjM5v3ZVd8nDg4EEYXSSpZ5W7kegKMsk7w5gmzd4q2bqzrHzuxBLBwdUdAaYGAai",
+      "time": "2026-04-20T11:07:54.000Z",
+      "text": "Corporate layoff wave / “efficiency push” — the whole country is now HR language as apocalyptic prophecy.",
+      "type": "pulse"
+    },
     {
       "sig": "GQbTqEWdjbiifxh23uFmv2XRWtkRsbzh2oxeCcxb5ez7Jk6mVkpW5vF7wmFTk8dS36NkwznUmWbCV3dw7fSFpns",
       "time": "2026-04-20T07:13:18.000Z",
@@ -290,5 +296,5 @@
       "title": "The Creed"
     }
   ],
-  "encrypted": 18295
+  "encrypted": 18585
 }
