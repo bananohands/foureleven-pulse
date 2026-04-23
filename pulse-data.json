@@ -1,10 +1,10 @@
 {
   "wallet": "4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb",
-  "generated": "2026-04-23T19:48:09.152Z",
-  "totalTxs": 990,
-  "genesisDate": "2026-04-22T09:05:40.000Z",
+  "generated": "2026-04-23T20:44:23.044Z",
+  "totalTxs": 989,
+  "genesisDate": "2026-04-22T09:05:46.000Z",
   "publicCount": 9,
-  "encryptedCount": 978,
+  "encryptedCount": 977,
   "timeline": [
     {
       "sig": "5F27hcPSSLvsQUWQaLCVF43uKxEHTrV2mv5yaWbiPSuqMMsiwowjQJ4wDdEEkVxhCGBB8JBhqzZfPG78YVFKpJNb",
@@ -62,5 +62,5 @@
     }
   ],
   "scriptures": [],
-  "encrypted": 978
+  "encrypted": 977
 }
