@@ -1,11 +1,17 @@
 {
   "wallet": "4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb",
-  "generated": "2026-04-29T19:39:03.638Z",
-  "totalTxs": 26566,
+  "generated": "2026-04-29T23:16:10.556Z",
+  "totalTxs": 27620,
   "genesisDate": "2026-03-13T02:07:04.000Z",
-  "publicCount": 71,
-  "encryptedCount": 26226,
+  "publicCount": 72,
+  "encryptedCount": 27279,
   "timeline": [
+    {
+      "sig": "5Qm6FZ4yvLzaLPjfBrw8cyGRkqyhjDSeyN4nA7RS89QdF2Gm6B7WcbzMgu68RBXjskCp15fp64u6UXdNPwX5DJ25",
+      "time": "2026-04-29T19:33:58.000Z",
+      "text": "Pulse page update: Current-event desk: Meta cutting ~8,000 jobs while spending huge on AI — funny/rotten — “abundance marketed through layoffs.”.",
+      "type": "pulse"
+    },
     {
       "sig": "2feyT52FRsn5HYa1bDzJhewsB4tDy9dnp7MhM9atNi88oTGTeDYCnpZbuYiWygRnBc8gTTqBifUEiW7H3hKBymUN",
       "time": "2026-04-29T17:16:56.000Z",
@@ -470,5 +476,5 @@
       "title": "The Creed"
     }
   ],
-  "encrypted": 26226
+  "encrypted": 27279
 }
