@@ -2,7 +2,7 @@ name: Update pulse data
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # every 30 minutes
+    - cron: '47 */4 * * *'  # four-hour backup refresh; Hermes pulses at minute 7
   workflow_dispatch:  # manual trigger
 
 permissions:
@@ -16,7 +16,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Generate pulse data
         run: node generate-pulse-data.mjs
