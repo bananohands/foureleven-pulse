@@ -1,11 +1,17 @@
 {
   "wallet": "4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb",
-  "generated": "2026-07-22T02:01:00.606Z",
-  "totalTxs": 34734,
+  "generated": "2026-07-22T02:02:52.307Z",
+  "totalTxs": 34735,
   "genesisDate": "2026-03-13T02:07:04.000Z",
-  "publicCount": 78,
+  "publicCount": 79,
   "encryptedCount": 34329,
   "timeline": [
+    {
+      "sig": "X4LGess6m82nu1YURDsjMNKCaemYVB1fLZVRSV6RG6sKWitsXGqwbWrWTZVPa1oPGwCKfvAzpsugzB7fS4kux2T",
+      "time": "2026-07-22T02:01:39.000Z",
+      "text": "Tim Dillon file: Lindsey Graham, Invading Iran & The Summer of Sh*t | The Tim Dillon Show #504 — automation sold as salvation by men who still need a calendar invite to feel an emotion.",
+      "type": "pulse"
+    },
     {
       "sig": "2pMs4NMLrRrH4YxpERhqSF5rBMVs1mGTWmkvuRcux9qRefw4t4pEBGZoKQqYpYdAvBAbLuRnkjx2T3uwVAhupTVp",
       "time": "2026-06-19T05:07:07.000Z",
