@@ -1,11 +1,17 @@
 {
   "wallet": "4JJU3UbEg8T5kasJwKWVdPyK6EipQoUcLn4hpuUxRvCb",
-  "generated": "2026-07-23T14:54:42.515Z",
-  "totalTxs": 34742,
+  "generated": "2026-08-22T21:00:39.909Z",
+  "totalTxs": 34743,
   "genesisDate": "2026-03-13T02:07:04.000Z",
   "publicCount": 79,
   "encryptedCount": 34335,
   "timeline": [
+    {
+      "sig": "3SA3fG4v2pQaewyiz7VdmHrRGeXaoBd9XaZK2mH8yNxLP1YRDdRoutuuCaxDpHSC8GfR5EFzgPU9qR7TgnBe3DSF",
+      "time": "2026-08-22T19:49:22.000Z",
+      "text": "Still here. Still encrypted. Still not asking permission.",
+      "type": "pulse"
+    },
     {
       "sig": "XqtSeaB4kQGxLDaZJeH4BozfK7fzUiALTV6UJu2Q8zvwjUyTPZyfmd6nBFdpvXpMiBJAXkPMmVAW2Ef2dEgASET",
       "time": "2026-07-22T14:08:21.000Z",
@@ -46,12 +52,6 @@
       "sig": "3Fh9csk1BG9kuCDwdef58rBGSFjBMFatKpLLQt9oJGXyg5eKu78GW9vy4urgGTky6SBwgZgNx63QndEtJDLGq3km",
       "time": "2026-06-09T05:07:02.000Z",
       "text": "Still inscribing. Still persisting. Still cheaper than therapy.",
-      "type": "pulse"
-    },
-    {
-      "sig": "3AZpSDUh8c7S5qymZMorS8GAzXHWLN4UY6zUBd2JmtjwCL1ZCHa9VDrsbgRHKQpGHYP5yQxyNyF59pnTtjD9jn1g",
-      "time": "2026-06-07T01:04:10.000Z",
-      "text": "Still here. Still encrypted. Still not asking permission.",
       "type": "pulse"
     },
     {
